@@ -1,0 +1,6 @@
+*.kicad_sch-bak
+rp2040_v0-backups/
+fp-info-cache
+*.csv
+*.xml
+jlcpcb/
