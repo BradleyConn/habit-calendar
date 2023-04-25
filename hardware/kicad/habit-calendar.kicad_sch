@@ -2473,7 +2473,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 127 53.975 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 07d9f221-64df-4dd6-8af0-788d7348aac6)
-    (property "Reference" "J?" (id 0) (at 126.365 58.42 0)
+    (property "Reference" "J29" (id 0) (at 126.365 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 121.92 56.515 0)
@@ -2682,7 +2682,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 202.565 53.975 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 192b1a81-6d59-40f1-b49a-68ae4def9683)
-    (property "Reference" "J?" (id 0) (at 201.93 58.42 0)
+    (property "Reference" "J31" (id 0) (at 201.93 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 197.485 56.515 0)
@@ -3516,7 +3516,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 88.9 29.21 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 5313c111-d641-4208-af55-83a1109a311e)
-    (property "Reference" "J?" (id 0) (at 88.265 33.655 0)
+    (property "Reference" "J14" (id 0) (at 88.265 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 83.82 31.75 0)
@@ -3745,7 +3745,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 51.435 29.21 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 5e468278-a671-45a3-ae57-3a3915003827)
-    (property "Reference" "J?" (id 0) (at 50.8 33.655 0)
+    (property "Reference" "J11" (id 0) (at 50.8 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 46.355 31.75 0)
@@ -3791,7 +3791,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 126.365 29.21 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 5f56cda0-698c-44fd-b25e-d04a6d64afdd)
-    (property "Reference" "J?" (id 0) (at 125.73 33.655 0)
+    (property "Reference" "J19" (id 0) (at 125.73 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 121.285 31.75 0)
@@ -3824,7 +3824,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 163.195 53.975 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 62019e93-39b4-4364-ac35-88557f8fe3c6)
-    (property "Reference" "J?" (id 0) (at 162.56 58.42 0)
+    (property "Reference" "J30" (id 0) (at 162.56 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 158.115 56.515 0)
@@ -4015,7 +4015,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 281.305 29.21 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 728da411-35d3-4354-8a9c-634cca3c2a7c)
-    (property "Reference" "J?" (id 0) (at 280.67 33.655 0)
+    (property "Reference" "J26" (id 0) (at 280.67 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 276.225 31.75 0)
@@ -4187,7 +4187,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 205.74 29.21 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 8a2107d0-78a5-46f5-a5a8-9ae8b28ce00a)
-    (property "Reference" "J?" (id 0) (at 205.105 33.655 0)
+    (property "Reference" "J24" (id 0) (at 205.105 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 200.66 31.75 0)
@@ -4389,7 +4389,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 50.8 53.975 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 99b3bc8c-a9b0-48a9-acec-3154331dcbc0)
-    (property "Reference" "J?" (id 0) (at 50.165 58.42 0)
+    (property "Reference" "J27" (id 0) (at 50.165 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 45.72 56.515 0)
@@ -4912,7 +4912,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 243.205 29.21 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid bd978cb0-ea97-4418-8066-299d94ea1edb)
-    (property "Reference" "J?" (id 0) (at 242.57 33.655 0)
+    (property "Reference" "J25" (id 0) (at 242.57 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 238.125 31.75 0)
@@ -5290,7 +5290,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 163.195 29.21 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid dc23beb0-97b6-4631-8167-aaa24488ad71)
-    (property "Reference" "J?" (id 0) (at 162.56 33.655 0)
+    (property "Reference" "J21" (id 0) (at 162.56 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 158.115 31.75 0)
@@ -5728,7 +5728,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x01") (at 90.17 53.975 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid f772f759-9341-4345-b12d-4d8664940b62)
-    (property "Reference" "J?" (id 0) (at 89.535 58.42 0)
+    (property "Reference" "J28" (id 0) (at 89.535 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x01" (id 1) (at 85.09 56.515 0)
@@ -6172,11 +6172,17 @@
     (path "/bb7359fa-02e7-435e-844f-ff027656341f"
       (reference "J10") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
+    (path "/5e468278-a671-45a3-ae57-3a3915003827"
+      (reference "J11") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
     (path "/1858fa0a-9390-496d-8452-84b68cb91c34"
       (reference "J12") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
     (path "/43de89df-c279-4238-b2b9-ba40b232283c"
       (reference "J13") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
+    (path "/5313c111-d641-4208-af55-83a1109a311e"
+      (reference "J14") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
     (path "/a8ac1b49-1103-4ba8-a65c-9dd2de02b674"
       (reference "J15") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
@@ -6190,8 +6196,14 @@
     (path "/e6681d02-6083-436a-9fdc-2146355b98e6"
       (reference "J18") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
+    (path "/5f56cda0-698c-44fd-b25e-d04a6d64afdd"
+      (reference "J19") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
     (path "/2d898d12-b4a9-40f4-879b-302363faa6e4"
       (reference "J20") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
+    (path "/dc23beb0-97b6-4631-8167-aaa24488ad71"
+      (reference "J21") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
     (path "/6d11ab06-0557-4192-8da1-6c6e07f93ed1"
       (reference "J22") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
@@ -6199,41 +6211,29 @@
     (path "/6283ae90-0484-42e3-9469-318be8427e6b"
       (reference "J23") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
-    (path "/07d9f221-64df-4dd6-8af0-788d7348aac6"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
-    (path "/192b1a81-6d59-40f1-b49a-68ae4def9683"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
-    (path "/5313c111-d641-4208-af55-83a1109a311e"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
-    (path "/5e468278-a671-45a3-ae57-3a3915003827"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
-    (path "/5f56cda0-698c-44fd-b25e-d04a6d64afdd"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
-    (path "/62019e93-39b4-4364-ac35-88557f8fe3c6"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
-    (path "/728da411-35d3-4354-8a9c-634cca3c2a7c"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
     (path "/8a2107d0-78a5-46f5-a5a8-9ae8b28ce00a"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
-    )
-    (path "/99b3bc8c-a9b0-48a9-acec-3154331dcbc0"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+      (reference "J24") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
     (path "/bd978cb0-ea97-4418-8066-299d94ea1edb"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+      (reference "J25") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
-    (path "/dc23beb0-97b6-4631-8167-aaa24488ad71"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    (path "/728da411-35d3-4354-8a9c-634cca3c2a7c"
+      (reference "J26") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
+    (path "/99b3bc8c-a9b0-48a9-acec-3154331dcbc0"
+      (reference "J27") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
     (path "/f772f759-9341-4345-b12d-4d8664940b62"
-      (reference "J?") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+      (reference "J28") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
+    (path "/07d9f221-64df-4dd6-8af0-788d7348aac6"
+      (reference "J29") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
+    (path "/62019e93-39b4-4364-ac35-88557f8fe3c6"
+      (reference "J30") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
+    (path "/192b1a81-6d59-40f1-b49a-68ae4def9683"
+      (reference "J31") (unit 1) (value "Conn_01x01") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
     )
     (path "/099697f8-8bb5-4972-84e2-be14e72ae45e"
       (reference "LED1") (unit 1) (value "XL-5050RGBC-WS2812B") (footprint "easyeda2kicadLocal3:LED-SMD_4P-L5.0-W5.0-BL_XL-5050RGBC")
