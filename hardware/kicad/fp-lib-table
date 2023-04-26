@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "easyeda2kicadLocal")(type "KiCad")(uri "${KIPRJMOD}/easyeda2kicad/easyeda2kicad.pretty")(options "")(descr "easyeda2kicad lcsc parts"))
+)
