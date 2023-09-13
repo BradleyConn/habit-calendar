@@ -1,0 +1,3 @@
+[submodule "software/py32f0-template"]
+	path = software/py32f0-template
+	url = git@github.com:BradleyConn/py32f0-template.git
