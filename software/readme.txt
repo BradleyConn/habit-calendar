@@ -15,7 +15,11 @@ may need to rebase the template submodule to 4c9de4301e8855a. That's where I was
     - Each micro needs a different ID
     - Top and bottom micro have different code (see below), but same code board to board (except for ID)
     - Remove all the micro<->LED resistors
-    - Top micro remove PF1 resistor
-        - Same board micro to micro half duplex over PF0
+    - Top micro remove PF0 resistor
+        - Same board micro to micro half duplex over PF1
     - Bottom micro remove PF0 resistor
-        - Board to board half duplex over PF1
+        - Board to board half duplex over PF0
+    - So resistors should be
+        - So no horizontal resistors
+        - Top micro veritcal resistors should be DNP, DNP, P (boot), DNP, DNP, P (PF1)
+        - Bottom micro veritcal resistors should be DNP, DNP, P (boot), DNP, P (PF0), DNP
