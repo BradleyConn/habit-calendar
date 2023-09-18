@@ -18,9 +18,9 @@
 #define MAX_BRIGHTNESS 0x0F
 #define NUM_SPEED_SETTINGS 0x08
 
-// UART Defines
-#define CALENDAR_USART_BAUDRATE                    115200
-#define CALENDAR_USART                             USART1
+#define BAUD_RATE 9600
+#define CALENDAR_UART_TX GPIO_PIN_1
+#define CALENDAR_UART_RX GPIO_PIN_0
 
 /* Private variables ---------------------------------------------------------*/
 uint32_t Settings[SETTING_SIZE];
@@ -149,18 +149,9 @@ int main(void)
     HAL_Init();
 
     APP_SystemClockConfig();
-    APP_LedConfig();
+    // XXX: This conflicts with uart pins
+    //APP_LedConfig();
     init_buttons();
-    UART_HandleTypeDef DebugUartHandle;
-    DebugUartHandle.Instance = CALENDAR_USART;
-
-    DebugUartHandle.Init.BaudRate = CALENDAR_USART_BAUDRATE;
-    DebugUartHandle.Init.WordLength = UART_WORDLENGTH_8B;
-    DebugUartHandle.Init.StopBits = UART_STOPBITS_1;
-    DebugUartHandle.Init.Parity = UART_PARITY_NONE;
-    DebugUartHandle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    DebugUartHandle.Init.Mode = UART_MODE_TX_RX;
-    HAL_StatusTypeDef status = HAL_UART_Init(&DebugUartHandle);
 
     // Copy flash into the buffer
     uint32_t *flash_program_start = (uint32_t *)FLASH_USER_START_ADDR;
@@ -295,7 +286,8 @@ int main(void)
         // plenty of time between bits
         // Make sure optimizations isn't changing the order of things
         // Check disassembling if something seems wonky.
-        for (int x = 0; x < NUM_BUTTONS; x++) {
+        // XXX: This conflicts with uart pins
+        /*for (int x = 0; x < NUM_BUTTONS; x++) {
             if (Settings[x] == 0) {
                 send_byte(g);
                 send_byte(r);
@@ -305,7 +297,7 @@ int main(void)
                 send_byte(0);
                 send_byte(0);
             }
-        }
+        }*/
     }
 }
 
@@ -602,6 +594,77 @@ void check_button_combo()
     } else {
         clear_all_buttons_held = false;
     }
+}
+
+void uart_init()
+{
+    GPIO_InitTypeDef GPIO_InitStruct_tx;
+
+    __HAL_RCC_GPIOF_CLK_ENABLE();
+
+    GPIO_InitStruct_tx.Pin = CALENDAR_UART_TX;
+    GPIO_InitStruct_tx.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct_tx.Pull = GPIO_PULLUP;
+    GPIO_InitStruct_tx.Speed = GPIO_SPEED_FREQ_HIGH;
+
+    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct_tx);
+    HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_SET); // Initialize TX pin high (idle state)
+
+    GPIO_InitTypeDef GPIO_InitStruct_rx;
+
+    GPIO_InitStruct_rx.Pin = CALENDAR_UART_RX;
+    GPIO_InitStruct_rx.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct_rx.Pull = GPIO_NOPULL;
+    GPIO_InitStruct_rx.Speed = GPIO_SPEED_FREQ_HIGH;
+
+    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct_rx);
+}
+
+void uart_send_byte(uint8_t data)
+{
+    // Start bit (low)
+    HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_RESET);
+    sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+
+    // Send data bits (LSB first)
+    for (int i = 0; i < 8; i++) {
+        if ((data >> i) & 1) {
+            HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_SET);
+        } else {
+            HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_RESET);
+        }
+
+        sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+    }
+
+    // Stop bit (high)
+    HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_SET);
+    sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+}
+
+// TODO: Make this non-blocking
+uint8_t uart_receive_byte()
+{
+    uint8_t data = 0;
+
+    // Wait for start bit
+    while (HAL_GPIO_ReadPin(GPIOF, CALENDAR_UART_RX)) {
+    }
+
+    // Wait for half a bit period and sample in the middle of the bit
+    sleep_us(1000000 / (2 * BAUD_RATE));
+
+    // Receive data bits (LSB first)
+    for (int i = 0; i < 8; i++) {
+        data |= (HAL_GPIO_ReadPin(GPIOF, CALENDAR_UART_RX) << i);
+        sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+    }
+
+    // Wait for stop bit
+    while (!HAL_GPIO_ReadPin(GPIOF, CALENDAR_UART_RX)) {
+    }
+
+    return data;
 }
 #ifdef USE_FULL_ASSERT
 
