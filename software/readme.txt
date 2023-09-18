@@ -1,6 +1,9 @@
 Different project options. Just move the main.c file into the User folder in the submodule and build from there.
 
 Use pico to load code onto board.
+XXX: TO PROGRAM MUST CONNECT TO 3.3V!!! (Not 5V)
+Connect pico pin GP3 to PA14
+Connect pico pin GP2 to PA13
 `sudo make flash`
 erase with `sudo pyocd erase -t py32f002ax5 --chip --config ./Misc/pyocd.yaml`
 
