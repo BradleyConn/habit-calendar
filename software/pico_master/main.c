@@ -18,8 +18,8 @@
 #define MAX_BRIGHTNESS 0x0F
 #define NUM_SPEED_SETTINGS 0x08
 
-// 10300 works for 9600 baud
-#define BAUD_RATE (10300)
+// 10200 works for 9600 baud
+#define BAUD_RATE (10200)
 #define CALENDAR_UART_TX GPIO_PIN_1
 #define CALENDAR_UART_RX GPIO_PIN_0
 
@@ -308,11 +308,12 @@ int main(void)
         // uart_send_byte(0x48);
         // uart_send_byte(0x69);
         // uart_send_byte(0x20);
-        // uart_send_byte(0x41);
-        // uart_send_byte(' ');
+        //  uart_send_byte(0x41);
+        //  uart_send_byte(' ');
         for (int a = 0; a < 256; a++) {
             uart_send_byte(a);
         }
+        HAL_Delay(1000);
     }
 }
 
