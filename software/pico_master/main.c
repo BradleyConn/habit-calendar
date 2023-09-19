@@ -18,7 +18,8 @@
 #define MAX_BRIGHTNESS 0x0F
 #define NUM_SPEED_SETTINGS 0x08
 
-#define BAUD_RATE 9600
+// 10300 works for 9600 baud
+#define BAUD_RATE (10300)
 #define CALENDAR_UART_TX GPIO_PIN_1
 #define CALENDAR_UART_RX GPIO_PIN_0
 
@@ -40,6 +41,10 @@ static void init_buttons(void);
 static void button_helper(uint8_t id, GPIO_PinState status);
 static void check_buttons(void);
 static void check_button_combo(void);
+// static void sleep_us(uint32_t us);
+static void uart_init();
+static void uart_send_byte(uint8_t data);
+static uint8_t uart_receive_byte();
 
 inline void zero()
 {
@@ -150,8 +155,9 @@ int main(void)
 
     APP_SystemClockConfig();
     // XXX: This conflicts with uart pins
-    //APP_LedConfig();
+    APP_LedConfig();
     init_buttons();
+    uart_init();
 
     // Copy flash into the buffer
     uint32_t *flash_program_start = (uint32_t *)FLASH_USER_START_ADDR;
@@ -287,7 +293,7 @@ int main(void)
         // Make sure optimizations isn't changing the order of things
         // Check disassembling if something seems wonky.
         // XXX: This conflicts with uart pins
-        /*for (int x = 0; x < NUM_BUTTONS; x++) {
+        for (int x = 0; x < NUM_BUTTONS; x++) {
             if (Settings[x] == 0) {
                 send_byte(g);
                 send_byte(r);
@@ -297,7 +303,16 @@ int main(void)
                 send_byte(0);
                 send_byte(0);
             }
-        }*/
+        }
+
+        // uart_send_byte(0x48);
+        // uart_send_byte(0x69);
+        // uart_send_byte(0x20);
+        // uart_send_byte(0x41);
+        // uart_send_byte(' ');
+        for (int a = 0; a < 256; a++) {
+            uart_send_byte(a);
+        }
     }
 }
 
@@ -596,6 +611,24 @@ void check_button_combo()
     }
 }
 
+// XXX: There is 0.8 us of overhead in this function! (should probably subtract by 1)
+// This was created experimentally by watching an oscilloscope - it is not that accurate
+void sleep_us(uint32_t us)
+{
+    for (volatile int x = 0; x < us; x++) {
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+    }
+}
+
 void uart_init()
 {
     GPIO_InitTypeDef GPIO_InitStruct_tx;
@@ -610,14 +643,16 @@ void uart_init()
     HAL_GPIO_Init(GPIOF, &GPIO_InitStruct_tx);
     HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_SET); // Initialize TX pin high (idle state)
 
-    GPIO_InitTypeDef GPIO_InitStruct_rx;
+    /*
+        GPIO_InitTypeDef GPIO_InitStruct_rx;
 
-    GPIO_InitStruct_rx.Pin = CALENDAR_UART_RX;
-    GPIO_InitStruct_rx.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct_rx.Pull = GPIO_NOPULL;
-    GPIO_InitStruct_rx.Speed = GPIO_SPEED_FREQ_HIGH;
+        GPIO_InitStruct_rx.Pin = CALENDAR_UART_RX;
+        GPIO_InitStruct_rx.Mode = GPIO_MODE_INPUT;
+        GPIO_InitStruct_rx.Pull = GPIO_NOPULL;
+        GPIO_InitStruct_rx.Speed = GPIO_SPEED_FREQ_HIGH;
 
-    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct_rx);
+        HAL_GPIO_Init(GPIOF, &GPIO_InitStruct_rx);
+        */
 }
 
 void uart_send_byte(uint8_t data)
@@ -633,7 +668,6 @@ void uart_send_byte(uint8_t data)
         } else {
             HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_RESET);
         }
-
         sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
     }
 
