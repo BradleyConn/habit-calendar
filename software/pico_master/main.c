@@ -184,138 +184,11 @@ int main(void)
     while (1) {
         // Always updated this counter
         update_count_count++;
-        uint8_t brightness = ((uint8_t)Settings[BRIGHTNESS_INDEX]) & 0x0f;
-        if (brightness == 0) {
-            brightness = 0x01;
-        }
         check_buttons();
         if (flash_needs_update) {
             update_flash();
         }
-        uint32_t speed = 1 << ((uint8_t)Settings[SPEED_INDEX]);
-        HAL_Delay(5);
-        // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-        // This should be outside the loop... Let's see if it's quick enough anyway
 
-        // The speed depends on brightness as there are more or less values to go through.
-        uint8_t g = 0;
-        uint8_t r = 0;
-        uint8_t b = 0;
-        if (Settings[RAINBOW_MODE_INDEX] == 1) {
-            if (update_count_count > 20 * speed / brightness) {
-                update_count_count = 0;
-                count = count + 1;
-                count = count % (brightness * 3);
-            }
-            // divide by 0xf by shifting
-            uint8_t grb = count / brightness;
-            uint8_t val = count % brightness;
-            if (grb == 0) {
-                r = val;
-                g = 0;
-                b = brightness - val;
-            } else if (grb == 1) {
-                g = val;
-                b = 0;
-                r = brightness - val;
-            } else if (grb == 2) {
-                b = val;
-                r = 0;
-                g = brightness - val;
-            }
-        } else {
-
-            uint32_t color_index = Settings[COLOR_INDEX];
-            uint32_t color = Colors[color_index];
-            uint8_t color_reduction = MAX_BRIGHTNESS - brightness;
-            r = ((uint8_t)((color & 0xf00) >> 8));
-            g = ((uint8_t)((color & 0x0f0) >> 4));
-            b = ((uint8_t)((color & 0x00f) >> 0));
-            // Full scale single color has full brightness control
-            if (color_index == 0 ||
-                color_index == 4 ||
-                color_index == 8) {
-                r = r - color_reduction;
-                g = g - color_reduction;
-                b = b - color_reduction;
-            }
-            // Half scale two even color has half brightness control
-            else if (color_index == 2 ||
-                     color_index == 6 ||
-                     color_index == 10) {
-                r = r - (color_reduction / 2);
-                g = g - (color_reduction / 2);
-                b = b - (color_reduction / 2);
-            }
-            // White is a special case and gets 0x0f/0x05 controls
-            else if (color_index == 12) {
-                r = r - (color_reduction / 3);
-                g = g - (color_reduction / 3);
-                b = b - (color_reduction / 3);
-            }
-            // Two colors, a 1:3 ratio. Needs special treatment
-            else if (color_index == 1 ||
-                     color_index == 3 ||
-                     color_index == 5 ||
-                     color_index == 7 ||
-                     color_index == 9 ||
-                     color_index == 11) {
-                uint8_t high = (color_reduction / 4) * 3;
-                uint8_t low = (color_reduction / 4) * 1;
-                if (color_index == 1) {
-                    r = r - high;
-                    g = g - low;
-                } else if (color_index == 3) {
-                    g = g - high;
-                    r = r - low;
-                } else if (color_index == 5) {
-                    g = g - high;
-                    b = b - low;
-                } else if (color_index == 7) {
-                    b = b - high;
-                    g = g - low;
-                } else if (color_index == 9) {
-                    b = b - high;
-                    r = r - low;
-                } else if (color_index == 11) {
-                    r = r - high;
-                    b = b - low;
-                }
-            }
-            if (r > 0x0f) {
-                r = 0;
-            }
-            if (g > 0x0f) {
-                g = 0;
-            }
-            if (b > 0x0f) {
-                b = 0;
-            }
-        }
-        // The timing is "sensitive" but that's more per bit than it is
-        // in total. It takes 6000ns to latch so there's actually
-        // plenty of time between bits
-        // Make sure optimizations isn't changing the order of things
-        // Check disassembling if something seems wonky.
-        // XXX: This conflicts with uart pins
-        for (int x = 0; x < NUM_BUTTONS; x++) {
-            if (Settings[x] == 0) {
-                send_byte(g);
-                send_byte(r);
-                send_byte(b);
-            } else {
-                send_byte(0);
-                send_byte(0);
-                send_byte(0);
-            }
-        }
-
-        // uart_send_byte(0x48);
-        // uart_send_byte(0x69);
-        // uart_send_byte(0x20);
-        //  uart_send_byte(0x41);
-        //  uart_send_byte(' ');
-        // for (int a = 0; a < 256; a++) {
         uart_send_byte(0x0);
         sleep_us(1000);
         uint8_t val = uart_rx_byte();
@@ -323,17 +196,15 @@ int main(void)
 
         uart_send_byte(val);
         sleep_us(1000);
-        //}
-        // HAL_Delay(1000);
-    }
 
-    // TODO: Try a server response approach. Only do action if instructed
-    //  Use half duplex uart approach!
-    //  Wait on front uart query
-    //  Forward to back uart
-    //  Wait on back uart response
-    //  Check button states
-    //  Add to payload and forward to front uart
+        // TODO: Try a server response approach. Only do action if instructed - but break to check buttons
+        //  Use half duplex uart approach!
+        //  Wait on front uart query
+        //  Forward to back uart
+        //  Wait on back uart response
+        //  Check button states
+        //  Add to payload and forward to front uart
+    }
 }
 
 static void APP_LedConfig(void)
