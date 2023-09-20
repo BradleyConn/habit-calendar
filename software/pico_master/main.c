@@ -20,8 +20,11 @@
 
 // 10200 works for 9600 baud
 #define BAUD_RATE (10200)
-#define CALENDAR_UART_TX GPIO_PIN_1
-#define CALENDAR_UART_RX GPIO_PIN_0
+#define CALENDAR_UART_TX GPIO_PIN_3
+#define CALENDAR_UART_TX_MODULE GPIOA
+
+#define CALENDAR_UART_RX GPIO_PIN_1
+#define CALENDAR_UART_RX_MODULE GPIOF
 
 /* Private variables ---------------------------------------------------------*/
 uint32_t Settings[SETTING_SIZE];
@@ -41,10 +44,12 @@ static void init_buttons(void);
 static void button_helper(uint8_t id, GPIO_PinState status);
 static void check_buttons(void);
 static void check_button_combo(void);
-// static void sleep_us(uint32_t us);
+static void sleep_us(uint32_t us);
+// Turn into front interface back interface
 static void uart_init();
 static void uart_send_byte(uint8_t data);
-static uint8_t uart_receive_byte();
+// Add timeout
+static uint8_t uart_rx_byte();
 
 inline void zero()
 {
@@ -310,11 +315,25 @@ int main(void)
         // uart_send_byte(0x20);
         //  uart_send_byte(0x41);
         //  uart_send_byte(' ');
-        for (int a = 0; a < 256; a++) {
-            uart_send_byte(a);
-        }
-        HAL_Delay(1000);
+        // for (int a = 0; a < 256; a++) {
+        uart_send_byte(0x0);
+        sleep_us(1000);
+        uint8_t val = uart_rx_byte();
+        sleep_us(1000);
+
+        uart_send_byte(val);
+        sleep_us(1000);
+        //}
+        // HAL_Delay(1000);
     }
+
+    // TODO: Try a server response approach. Only do action if instructed
+    //  Use half duplex uart approach!
+    //  Wait on front uart query
+    //  Forward to back uart
+    //  Wait on back uart response
+    //  Check button states
+    //  Add to payload and forward to front uart
 }
 
 static void APP_LedConfig(void)
@@ -436,7 +455,7 @@ static void init_buttons(void)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
     GPIO_InitStruct.Pin = GPIO_PIN_3;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    // HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
     GPIO_InitStruct.Pin = GPIO_PIN_4;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -474,7 +493,7 @@ void check_buttons()
     button_helper(5, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0));
     button_helper(6, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_2));
     button_helper(7, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1));
-    button_helper(8, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3));
+    // button_helper(8, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3));
     button_helper(9, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2));
     button_helper(10, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1));
     button_helper(11, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4));
@@ -634,6 +653,9 @@ void uart_init()
 {
     GPIO_InitTypeDef GPIO_InitStruct_tx;
 
+    // Just enable them all
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOF_CLK_ENABLE();
 
     GPIO_InitStruct_tx.Pin = CALENDAR_UART_TX;
@@ -641,63 +663,72 @@ void uart_init()
     GPIO_InitStruct_tx.Pull = GPIO_PULLUP;
     GPIO_InitStruct_tx.Speed = GPIO_SPEED_FREQ_HIGH;
 
-    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct_tx);
-    HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_SET); // Initialize TX pin high (idle state)
+    HAL_GPIO_Init(CALENDAR_UART_TX_MODULE, &GPIO_InitStruct_tx);
+    HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_SET); // Initialize TX pin high (idle state)
 
-    /*
-        GPIO_InitTypeDef GPIO_InitStruct_rx;
+    GPIO_InitTypeDef GPIO_InitStruct_rx;
 
-        GPIO_InitStruct_rx.Pin = CALENDAR_UART_RX;
-        GPIO_InitStruct_rx.Mode = GPIO_MODE_INPUT;
-        GPIO_InitStruct_rx.Pull = GPIO_NOPULL;
-        GPIO_InitStruct_rx.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct_rx.Pin = CALENDAR_UART_RX;
+    GPIO_InitStruct_rx.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct_rx.Pull = GPIO_NOPULL;
+    GPIO_InitStruct_rx.Speed = GPIO_SPEED_FREQ_HIGH;
 
-        HAL_GPIO_Init(GPIOF, &GPIO_InitStruct_rx);
-        */
+    HAL_GPIO_Init(CALENDAR_UART_RX_MODULE, &GPIO_InitStruct_rx);
 }
 
 void uart_send_byte(uint8_t data)
 {
     // Start bit (low)
-    HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_RESET);
     sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
 
     // Send data bits (LSB first)
     for (int i = 0; i < 8; i++) {
         if ((data >> i) & 1) {
-            HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_SET);
         } else {
-            HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_RESET);
         }
         sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
     }
 
     // Stop bit (high)
-    HAL_GPIO_WritePin(GPIOF, CALENDAR_UART_TX, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_SET);
     sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
 }
 
 // TODO: Make this non-blocking
-uint8_t uart_receive_byte()
+uint8_t uart_rx_byte()
 {
     uint8_t data = 0;
+    // while (1){HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, HAL_GPIO_ReadPin(CALENDAR_UART_RX_MODULE, CALENDAR_UART_RX));}
+
+    // HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_RESET);
 
     // Wait for start bit
-    while (HAL_GPIO_ReadPin(GPIOF, CALENDAR_UART_RX)) {
+    while (HAL_GPIO_ReadPin(CALENDAR_UART_RX_MODULE, CALENDAR_UART_RX) == GPIO_PIN_SET) {
     }
+
+    ////HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_RESET);
 
     // Wait for half a bit period and sample in the middle of the bit
     sleep_us(1000000 / (2 * BAUD_RATE));
+    sleep_us(1000000 / (BAUD_RATE));
 
     // Receive data bits (LSB first)
     for (int i = 0; i < 8; i++) {
-        data |= (HAL_GPIO_ReadPin(GPIOF, CALENDAR_UART_RX) << i);
+        data |= (HAL_GPIO_ReadPin(CALENDAR_UART_RX_MODULE, CALENDAR_UART_RX) << i);
+        ////HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, HAL_GPIO_ReadPin(CALENDAR_UART_RX_MODULE, CALENDAR_UART_RX));
         sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
     }
 
+    // HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_SET);
+
     // Wait for stop bit
-    while (!HAL_GPIO_ReadPin(GPIOF, CALENDAR_UART_RX)) {
+    while (HAL_GPIO_ReadPin(CALENDAR_UART_RX_MODULE, CALENDAR_UART_RX) == GPIO_PIN_RESET) {
     }
+
+    ////HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_SET);
 
     return data;
 }
