@@ -37,8 +37,6 @@ typedef enum { tx = 0,
 uint32_t Settings[SETTING_SIZE];
 uint32_t Button_held[NUM_BUTTONS];
 bool flash_needs_update = false;
-const uint16_t Colors[NUM_COLORS] = {0xf00, 0xb40, 0x880, 0x4b0, 0x0f0, 0x0b4, 0x088, 0x04b,
-                                     0x00f, 0x40b, 0x808, 0xb04, 0x555};
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -50,14 +48,11 @@ static void APP_ErrorHandler(void);
 static void init_buttons(void);
 static void button_helper(uint8_t id, GPIO_PinState status);
 static void check_buttons(void);
-static void check_button_combo(void);
 static void sleep_us(uint32_t us);
 // Turn into front interface back interface
 static void uart_init(front_back fb, tx_rx txrx);
 static void uart_send_byte(front_back fb, uint8_t data);
 static uint8_t uart_rx_byte(front_back fb);
-// static bool uart_rx_byte_timeout(uint8_t *byte, uint32_t timeout_ms);
-// static void lptim_init();
 
 inline void zero()
 {
@@ -525,138 +520,6 @@ void check_buttons()
     button_helper(9, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2));
     button_helper(10, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1));
     button_helper(11, HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4));
-
-    check_button_combo();
-}
-
-bool brightness_up_held = false;
-bool brightness_down_held = false;
-bool color_up_held = false;
-bool color_down_held = false;
-bool speed_up_held = false;
-bool speed_down_held = false;
-bool rainbow_mode_held = false;
-bool erase_extra_settings_held = false;
-bool clear_all_buttons_held = false;
-void check_button_combo()
-{
-    // Brightness changing
-    // Right is up
-    if (Button_held[0] == 1 && Button_held[8] == 1) {
-        if (brightness_up_held == false) {
-            brightness_up_held = true;
-            Settings[BRIGHTNESS_INDEX] = (Settings[BRIGHTNESS_INDEX] + 1) % (MAX_BRIGHTNESS + 1);
-            flash_needs_update = true;
-        }
-    } else {
-        brightness_up_held = false;
-    }
-    // Left is down
-    if (Button_held[0] == 1 && Button_held[7] == 1) {
-        if (brightness_down_held == false) {
-            brightness_down_held = true;
-            Settings[BRIGHTNESS_INDEX] = (Settings[BRIGHTNESS_INDEX] - 1);
-            if (Settings[BRIGHTNESS_INDEX] > MAX_BRIGHTNESS || Settings[BRIGHTNESS_INDEX] < 0) {
-                Settings[BRIGHTNESS_INDEX] = MAX_BRIGHTNESS;
-            }
-            flash_needs_update = true;
-        }
-    } else {
-        brightness_down_held = false;
-    }
-    // Color changing
-    // Right row is up
-    if (Button_held[0] == 1 && Button_held[9] == 1) {
-        if (color_up_held == false) {
-            color_up_held = true;
-            Settings[COLOR_INDEX] = (Settings[COLOR_INDEX] + 1) % NUM_COLORS;
-            flash_needs_update = true;
-        }
-    } else {
-        color_up_held = false;
-    }
-    // Left is down
-    if (Button_held[0] == 1 && Button_held[6] == 1) {
-        if (color_down_held == false) {
-            color_down_held = true;
-            Settings[COLOR_INDEX] = Settings[COLOR_INDEX] - 1;
-            if (Settings[COLOR_INDEX] > NUM_COLORS || Settings[COLOR_INDEX] < 0) {
-                Settings[COLOR_INDEX] = NUM_COLORS - 1;
-            }
-
-            flash_needs_update = true;
-        }
-    } else {
-        color_down_held = false;
-    }
-
-    // Rainbow speed settings
-    // Right is faster
-    if (Button_held[0] == 1 && Button_held[10] == 1) {
-        if (speed_up_held == false) {
-            speed_up_held = true;
-            Settings[SPEED_INDEX] = Settings[SPEED_INDEX] - 1;
-            if (Settings[SPEED_INDEX] > NUM_SPEED_SETTINGS || Settings[SPEED_INDEX] < 0) {
-                Settings[SPEED_INDEX] = NUM_SPEED_SETTINGS;
-            }
-            flash_needs_update = true;
-        }
-    } else {
-        speed_up_held = false;
-    }
-    // Left is slower
-    if (Button_held[0] == 1 && Button_held[5] == 1) {
-        if (speed_down_held == false) {
-            speed_down_held = true;
-            Settings[SPEED_INDEX] = (Settings[SPEED_INDEX] + 1);
-            if (Settings[SPEED_INDEX] >= NUM_SPEED_SETTINGS) {
-                Settings[SPEED_INDEX] = 0;
-            }
-            flash_needs_update = true;
-        }
-    } else {
-        speed_down_held = false;
-    }
-
-    if (Button_held[0] == 1 && Button_held[11] == 1) {
-        if (rainbow_mode_held == false) {
-            rainbow_mode_held = true;
-            if (Settings[RAINBOW_MODE_INDEX] == 0) {
-                Settings[RAINBOW_MODE_INDEX] = 1;
-            } else {
-                Settings[RAINBOW_MODE_INDEX] = 0;
-            }
-            flash_needs_update = true;
-        }
-    } else {
-        rainbow_mode_held = false;
-    }
-    // 4 corners held is a settings reset!
-    if (Button_held[0] == 1 && Button_held[3] == 1 && Button_held[8] == 1 && Button_held[11] == 1) {
-        if (erase_extra_settings_held == false) {
-            erase_extra_settings_held = true;
-            // Skip past the buttons!
-            for (int x = NUM_BUTTONS; x < SETTING_SIZE; x++) {
-                Settings[x] = 0;
-            }
-            Settings[FLASHVALID_INDEX] = VALID_FLAG;
-            flash_needs_update = true;
-        }
-    } else {
-        erase_extra_settings_held = false;
-    }
-
-    if (Button_held[0] == 1 && Button_held[3] == 1 && Button_held[8] == 1 && Button_held[10] == 1) {
-        if (clear_all_buttons_held == false) {
-            clear_all_buttons_held = true;
-            for (int x = 0; x < NUM_BUTTONS; x++) {
-                Settings[x] = 1;
-            }
-            flash_needs_update = true;
-        }
-    } else {
-        clear_all_buttons_held = false;
-    }
 }
 
 // XXX: There is 0.8 us of overhead in this function! (should probably subtract by 1)
