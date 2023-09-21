@@ -39,7 +39,6 @@ uint32_t Button_held[NUM_BUTTONS];
 bool flash_needs_update = false;
 const uint16_t Colors[NUM_COLORS] = {0xf00, 0xb40, 0x880, 0x4b0, 0x0f0, 0x0b4, 0x088, 0x04b,
                                      0x00f, 0x40b, 0x808, 0xb04, 0x555};
-bool timer_elapsed = false;
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -174,12 +173,23 @@ int main(void)
     uart_init(front, tx);
     uart_init(back, rx);
 
+    //IWDG_HandleTypeDef hiwdg = {0};
+    //hiwdg.Instance = IWDG;
+    //hiwdg.Init.Prescaler = IWDG_PRESCALER_4;
+    //hiwdg.Init.Reload = 0xF;
+    //HAL_IWDG_Init(&hiwdg);
+    //HAL_IWDG_Refresh(&hiwdg);
+
+    HAL_Delay(100);
+    uart_send_byte(front, 'b');
+
+
     // Copy flash into the buffer
     uint32_t *flash_program_start = (uint32_t *)FLASH_USER_START_ADDR;
     for (int x = 0; x < SETTING_SIZE; x++) {
         Settings[x] = flash_program_start[x];
     }
-    // Currupt flash! Read the redundent page
+    // Corrupt flash! Read the redundent page
     if (Settings[FLASHVALID_INDEX] != VALID_FLAG) {
         uint32_t *flash_program_start_two = (uint32_t *)FLASH_USER_START_ADDR_REDUNDANT;
         for (int x = 0; x < SETTING_SIZE; x++) {
@@ -731,7 +741,14 @@ void uart_send_byte(front_back fb, uint8_t data)
 
     // Stop bit (high)
     HAL_GPIO_WritePin(GPIO_Module, GPIO_Pin, GPIO_PIN_SET);
+    // Just make sure we're high for long enough
     sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+    sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+    sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+    sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+    sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
+
+
 }
 
 uint8_t uart_rx_byte(front_back fb)
@@ -749,7 +766,17 @@ uint8_t uart_rx_byte(front_back fb)
     }
 
     // Wait for start bit
+    uint32_t ticks = HAL_GetTick();
     while (HAL_GPIO_ReadPin(GPIO_Module, GPIO_Pin) == GPIO_PIN_SET) {
+        // If we roll over it's unsigned so the number will be really big and we'll just loop instantly one time
+        // Looping every doesn't seem to matter anyway, though not sure with writing to flash... Meh just update flash outside of this loop
+        if (HAL_GetTick() - ticks > 10) {
+            ticks = HAL_GetTick();
+            check_buttons();
+            //if (flash_needs_update) {
+            //    update_flash();
+            //}
+        }
     }
 
     ////HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_RESET);
@@ -768,6 +795,7 @@ uint8_t uart_rx_byte(front_back fb)
     // HAL_GPIO_WritePin(CALENDAR_UART_TX_MODULE, CALENDAR_UART_TX, GPIO_PIN_SET);
 
     // Wait for stop bit
+    // TODO: timeout if we get stuck?... I mean it all has to work to work so *shrug*...
     while (HAL_GPIO_ReadPin(GPIO_Module, GPIO_Pin) == GPIO_PIN_RESET) {
     }
 
