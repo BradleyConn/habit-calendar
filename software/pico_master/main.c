@@ -2,9 +2,11 @@
 #include "py32f0xx_bsp_printf.h"
 #include "py32f0xx_hal.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Private define ------------------------------------------------------------*/
-#define CALENDAR_CHIP_ID 6
+#define DEBUG 1
+#define CALENDAR_CHIP_ID 7
 #define MAX_CALENDAR_CHIP_ID 7
 #define FLASH_USER_START_ADDR 0x08004000
 #define FLASH_USER_START_ADDR_REDUNDANT 0x08003000
@@ -23,11 +25,25 @@
 // 10200 works for 9600 baud
 #define BAUD_RATE (10300)
 
-#define CALENDAR_FRONT_UART_PIN GPIO_PIN_3
+#define CALENDAR_FRONT_UART_PIN GPIO_PIN_7
 #define CALENDAR_FRONT_UART_MODULE GPIOA
 
 #define CALENDAR_BACK_UART_PIN GPIO_PIN_1
 #define CALENDAR_BACK_UART_MODULE GPIOF
+
+#if 0
+#if CALENDAR_CHIP_ID % 2 == 0
+#define CALENDAR_FRONT_UART_PIN GPIO_PIN_0
+#define CALENDAR_FRONT_UART_MODULE GPIOF
+#define CALENDAR_BACK_UART_PIN GPIO_PIN_1
+#define CALENDAR_BACK_UART_MODULE GPIOF
+#else
+#define CALENDAR_FRONT_UART_PIN GPIO_PIN_1
+#define CALENDAR_FRONT_UART_MODULE GPIOF
+#define CALENDAR_BACK_UART_PIN GPIO_PIN_0
+#define CALENDAR_BACK_UART_MODULE GPIOF
+#endif
+#endif
 
 typedef enum { front = 0,
                back = 1 } front_back;
@@ -55,6 +71,8 @@ static void sleep_us(uint32_t us);
 static void uart_init(front_back fb, tx_rx txrx);
 static void uart_send_byte(front_back fb, uint8_t data);
 static uint8_t uart_rx_byte(front_back fb);
+
+static void uart_print_byte(uint8_t data);
 
 inline void zero()
 {
@@ -215,6 +233,9 @@ int main(void)
         // val = front_uart_rx();
         uint8_t query_char = uart_rx_byte(front);
         // Don't need a specific val just trigger on anything
+        #if DEBUG
+        HAL_Delay(5000);
+        #endif
         // back_uart_init_tx();
         uart_init(back, tx);
         // back_uart_send(query_char);
@@ -240,6 +261,10 @@ int main(void)
             // front_uart_tx(payload[x]);
             uart_send_byte(front, payload[x]);
             HAL_Delay(5);
+#if DEBUG
+            uart_print_byte(payload[x]);
+            HAL_Delay(5);
+#endif
         }
 
         // Pack the buttons into two bytes
@@ -256,121 +281,91 @@ int main(void)
         }
         uart_send_byte(front, byte1);
         HAL_Delay(5);
+#if DEBUG
+        uart_print_byte(byte1);
+        HAL_Delay(5);
+#endif
         uart_send_byte(front, byte2);
         HAL_Delay(5);
-
-        if (Settings[0]) {
-            uart_send_byte(front, 'Y');
-        } else {
-            uart_send_byte(front, 'N');
-        }
-#if 0            
-        HAL_Delay(500);
-
-        if (data == '*') {
-            uart_send_byte(front, 'g');
-        } else if (data == 'Y') {
-            uart_send_byte(front, 'e');
-        } else if (data == 'N') {
-            uart_send_byte(front, 'c');
-        } else {
-            uart_send_byte(front, 'o');
-        }
-
-                HAL_Delay(1);
-
-        if(data < 100) {
-            uart_send_byte(front, '0');
-        }
-        else if (data < 200) {
-            uart_send_byte(front, '1');
-            data = data - 100;
-        }
-        else {
-            uart_send_byte(front, '2');
-            data = data - 200;
-        }
-
-                HAL_Delay(1);
-
-        if (data < 10) {
-            uart_send_byte(front, '0');
-        }
-        else if (data < 20) {
-            uart_send_byte(front, '1');
-            data = data - 10;
-        }
-        else if (data < 30) {
-            uart_send_byte(front, '2');
-            data = data - 20;
-        }
-        else if (data < 40) {
-            uart_send_byte(front, '3');
-            data = data - 30;
-        }
-        else if (data < 50) {
-            uart_send_byte(front, '4');
-            data = data - 40;
-        }
-        else if (data < 60) {
-            uart_send_byte(front, '5');
-            data = data - 50;
-        }
-        else if (data < 70) {
-            uart_send_byte(front, '6');
-            data = data - 60;
-        }
-        else if (data < 80) {
-            uart_send_byte(front, '7');
-            data = data - 70;
-        }
-        else if (data < 90) {
-            uart_send_byte(front, '8');
-            data = data - 80;
-        }
-        else {
-            uart_send_byte(front, '9');
-            data = data - 90;
-        }
-
-                HAL_Delay(500);
-
-        if (data == 0) {
-            uart_send_byte(front, '0');
-        }
-        else if (data == 1) {
-            uart_send_byte(front, '1');
-        }
-        else if (data == 2) {
-            uart_send_byte(front, '2');
-        }
-        else if (data == 3) {
-            uart_send_byte(front, '3');
-        }
-        else if (data == 4) {
-            uart_send_byte(front, '4');
-        }
-        else if (data == 5) {
-            uart_send_byte(front, '5');
-        }
-        else if (data == 6) {
-            uart_send_byte(front, '6');
-        }
-        else if (data == 7) {
-            uart_send_byte(front, '7');
-        }
-        else if (data == 8) {
-            uart_send_byte(front, '8');
-        }
-        else if (data == 9) {
-            uart_send_byte(front, '9');
-        }
-        else {
-            uart_send_byte(front, '!');
-        }
+#if DEBUG
+        uart_print_byte(byte2);
+        HAL_Delay(5);
 #endif
-
         HAL_Delay(10);
+    }
+}
+
+void uart_print_byte(uint8_t data)
+{
+    HAL_Delay(1);
+
+    if (data < 100) {
+        uart_send_byte(front, '0');
+    } else if (data < 200) {
+        uart_send_byte(front, '1');
+        data = data - 100;
+    } else {
+        uart_send_byte(front, '2');
+        data = data - 200;
+    }
+
+    HAL_Delay(1);
+
+    if (data < 10) {
+        uart_send_byte(front, '0');
+    } else if (data < 20) {
+        uart_send_byte(front, '1');
+        data = data - 10;
+    } else if (data < 30) {
+        uart_send_byte(front, '2');
+        data = data - 20;
+    } else if (data < 40) {
+        uart_send_byte(front, '3');
+        data = data - 30;
+    } else if (data < 50) {
+        uart_send_byte(front, '4');
+        data = data - 40;
+    } else if (data < 60) {
+        uart_send_byte(front, '5');
+        data = data - 50;
+    } else if (data < 70) {
+        uart_send_byte(front, '6');
+        data = data - 60;
+    } else if (data < 80) {
+        uart_send_byte(front, '7');
+        data = data - 70;
+    } else if (data < 90) {
+        uart_send_byte(front, '8');
+        data = data - 80;
+    } else {
+        uart_send_byte(front, '9');
+        data = data - 90;
+    }
+
+    HAL_Delay(500);
+
+    if (data == 0) {
+        uart_send_byte(front, '0');
+    } else if (data == 1) {
+        uart_send_byte(front, '1');
+    } else if (data == 2) {
+        uart_send_byte(front, '2');
+    } else if (data == 3) {
+        uart_send_byte(front, '3');
+    } else if (data == 4) {
+        uart_send_byte(front, '4');
+    } else if (data == 5) {
+        uart_send_byte(front, '5');
+    } else if (data == 6) {
+        uart_send_byte(front, '6');
+    } else if (data == 7) {
+        uart_send_byte(front, '7');
+    } else if (data == 8) {
+        uart_send_byte(front, '8');
+    } else if (data == 9) {
+        uart_send_byte(front, '9');
+    } else {
+        uart_send_byte(front, '!');
     }
 }
 
