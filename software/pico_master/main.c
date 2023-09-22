@@ -5,6 +5,7 @@
 
 /* Private define ------------------------------------------------------------*/
 #define CALENDAR_CHIP_ID 6
+#define MAX_CALENDAR_CHIP_ID 7
 #define FLASH_USER_START_ADDR 0x08004000
 #define FLASH_USER_START_ADDR_REDUNDANT 0x08003000
 #define SETTING_SIZE 64
@@ -37,6 +38,7 @@ typedef enum { tx = 0,
 uint32_t Settings[SETTING_SIZE];
 uint32_t Button_held[NUM_BUTTONS];
 bool flash_needs_update = false;
+uint8_t payload[64];
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -168,23 +170,22 @@ int main(void)
     uart_init(front, tx);
     uart_init(back, rx);
 
-    //IWDG_HandleTypeDef hiwdg = {0};
-    //hiwdg.Instance = IWDG;
-    //hiwdg.Init.Prescaler = IWDG_PRESCALER_4;
-    //hiwdg.Init.Reload = 0xF;
-    //HAL_IWDG_Init(&hiwdg);
-    //HAL_IWDG_Refresh(&hiwdg);
+    // IWDG_HandleTypeDef hiwdg = {0};
+    // hiwdg.Instance = IWDG;
+    // hiwdg.Init.Prescaler = IWDG_PRESCALER_4;
+    // hiwdg.Init.Reload = 0xF;
+    // HAL_IWDG_Init(&hiwdg);
+    // HAL_IWDG_Refresh(&hiwdg);
 
     HAL_Delay(100);
     uart_send_byte(front, 'b');
-
 
     // Copy flash into the buffer
     uint32_t *flash_program_start = (uint32_t *)FLASH_USER_START_ADDR;
     for (int x = 0; x < SETTING_SIZE; x++) {
         Settings[x] = flash_program_start[x];
     }
-    // Corrupt flash! Read the redundent page
+    // Corrupt flash! Read the redundant page
     if (Settings[FLASHVALID_INDEX] != VALID_FLAG) {
         uint32_t *flash_program_start_two = (uint32_t *)FLASH_USER_START_ADDR_REDUNDANT;
         for (int x = 0; x < SETTING_SIZE; x++) {
@@ -213,22 +214,18 @@ int main(void)
         uart_init(front, rx);
         // val = front_uart_rx();
         uint8_t query_char = uart_rx_byte(front);
-        // don't need val just trigger on anything
-        // If it's not the last chip in the chain forward it
-        // Otherwise just send the state
-        uint8_t data = '*';
-        if (CALENDAR_CHIP_ID != 7) {
-            // back_uart_init_tx();
-            uart_init(back, tx);
-            // back_uart_send(query_char);
-            uart_send_byte(back, query_char);
-            // back_uart_init_rx();
-            uart_init(back, rx);
-            // for (expected_len) {
+        // Don't need a specific val just trigger on anything
+        // back_uart_init_tx();
+        uart_init(back, tx);
+        // back_uart_send(query_char);
+        uart_send_byte(back, query_char);
+        // back_uart_init_rx();
+        uart_init(back, rx);
+        // 12 buttons per chip so two bytes each when packed
+        uint8_t num_loops = (MAX_CALENDAR_CHIP_ID - CALENDAR_CHIP_ID) * 2;
+        for (int x = 0; x < num_loops; x++) {
             // back_uart_rx()
-            data = uart_rx_byte(back);
-            // TODO: watchdog?
-            //}
+            payload[x] = uart_rx_byte(back);
         }
         // check_buttons();
         check_buttons();
@@ -239,9 +236,28 @@ int main(void)
         // front_uart_init_tx();
         uart_init(front, tx);
         // for (expected_len) {
-        // front_uart_tx(data[i]);
-        HAL_Delay(5000);
-        // TODO: pack the bytes
+        for (int x = 0; x < num_loops; x++) {
+            // front_uart_tx(payload[x]);
+            uart_send_byte(front, payload[x]);
+            HAL_Delay(5);
+        }
+
+        // Pack the buttons into two bytes
+        // Use the lower bits where timing isn't compounded
+        uint8_t byte1 = 0;
+        uint8_t byte2 = 0;
+        for (int x = 0; x < NUM_BUTTONS / 2; x++) {
+            if (Settings[x]) {
+                byte1 = byte1 | (1 << x);
+            }
+            if (Settings[NUM_BUTTONS / 2 + x]) {
+                byte2 = byte2 | (1 << x);
+            }
+        }
+        uart_send_byte(front, byte1);
+        HAL_Delay(5);
+        uart_send_byte(front, byte2);
+        HAL_Delay(5);
 
         if (Settings[0]) {
             uart_send_byte(front, 'Y');
@@ -355,7 +371,6 @@ int main(void)
 #endif
 
         HAL_Delay(10);
-        uart_send_byte(front, data);
     }
 }
 
@@ -610,8 +625,6 @@ void uart_send_byte(front_back fb, uint8_t data)
     sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
     sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
     sleep_us(1000000 / BAUD_RATE); // Delay to match baud rate
-
-
 }
 
 uint8_t uart_rx_byte(front_back fb)
@@ -636,9 +649,9 @@ uint8_t uart_rx_byte(front_back fb)
         if (HAL_GetTick() - ticks > 10) {
             ticks = HAL_GetTick();
             check_buttons();
-            //if (flash_needs_update) {
-            //    update_flash();
-            //}
+            // if (flash_needs_update) {
+            //     update_flash();
+            // }
         }
     }
 
